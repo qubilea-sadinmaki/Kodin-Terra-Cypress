@@ -25,7 +25,6 @@ Cypress.Commands.add('gotoHomeAndVerify', (selector, locator) => {
 
 Cypress.Commands.add('navigateToLocationAndVerify', (location, locator) => {
     const sel = '[data-segmentid=' + location + ']'
-    // cy.get('.modal-body').should('be.visible')
     cy.waitLoaderNotVisible()
     cy.get(sel).click()
     cy.contains(locator,{timeout:10000})
@@ -114,12 +113,7 @@ Cypress.Commands.add('verifyShoppingdesk', () => {
         let arr = Array.from({length:$l},(v,k)=>k)
 
         cy.wrap(arr).each((index) => {
-            cy.get('@products').eq(index).within(($element) => {
-                // cy.get('[class="title"]').then(wrapper =>
-                //     {
-                //     let wrapperTxt = wrapper.text()
-                //     cy.expect( wrapperTxt ).to.include( SHOPPINGCART_CACHE.getProduct(index).name )
-                //     })  
+            cy.get('@products').eq(index).within(($element) => { 
                 cy.contains(SHOPPINGCART_CACHE.getProduct(index).name)
                 cy.contains(SHOPPINGCART_CACHE.getProduct(index).count + " " + SHOPPINGCART_CACHE.getProduct(index).unit)
                 cy.contains(SHOPPINGCART_CACHE.getProduct(index).price)       
@@ -137,11 +131,10 @@ Cypress.Commands.add('verifyShoppingdesk', () => {
    Cypress.Commands.add('verifyDelivery', (chosen_delivery_method='Toimitus kotiin') => {
     let delivery_cost
     cy.waitLoaderNotVisible()
-    cy.contains(chosen_delivery_method).click({force:true}).wait(3000) //[data-shipping-mode="' +  chosen_delivery_method+'"]
+    cy.contains(chosen_delivery_method).click({force:true}).wait(3000)
 
 
     cy.contains(chosen_delivery_method).within(($element) => {
-        //cy.get('[class="col-12 col-sm-6 col-md-12 col-lg-6  m-0 font-grumpy costs shoppingprocess-price"]')
         cy.wrap($element).find('.col > .justify-content-between > :nth-child(2) > .row > .m-0')
         .invoke('text').then(($delivery_cost) => {
             delivery_cost = $delivery_cost 
