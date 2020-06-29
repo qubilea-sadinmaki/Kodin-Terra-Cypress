@@ -1,13 +1,13 @@
 {"products":[
-    { "name":"Weber Genesis II E-410 GBS kaasugrilli", "count":"1" },
-    { "name":"Weber suojapeite Premium Gen II 3 P.", "count":"1" },
-    { "name":"Weber Original vihannespannu, iso", "count":"1" },
-    { "name":"Weber savustulastut siipikarjalle", "count":"1" },
-    { "name":"Weber Pulse 1000 jalustalla sähkögrilli", "count":"1" },
-    { "name":"Weber Spirit EO-210 kaasugrilli", "count":"1" },
-    { "name":"Ellix kirvesmiehen vasara 450g", "count":"1" },
-    { "name":"Lux pajavasara 1000g Classic", "count":"1" },
-    { "name":"Obi naulalajitelma 550kpl", "count":"1" }
+    { "name":"Weber Genesis II E-410 GBS kaasugrilli", "shortname":"Weber Genesis II E-410 GBS kaasugrilli" },
+    { "name":"Weber suojapeite Premium Gen ii 4 p.", "shortname":"Weber suojapeite Premium Gen ii 4 p." },
+    { "name":"Weber Original vihannespannu, iso", "shortname":"Weber Original vihannespannu, iso" },
+    { "name":"Weber savustulastut siipikarjalle", "shortname":"Weber savustulastut siipikarjalle" },
+    { "name":"Weber Spirit II E-320 GBS kaasugrilli", "shortname":"Weber Spirit II E-320 GBS kaasugrilli" },
+    { "name":"Weber Spirit EO-210 kaasugrilli", "shortname":"Weber Spirit EO-210 kaasugrilli" },
+    { "name":"Ellix kirvesmiehen vasara 450g", "shortname":"Ellix kirvesmiehen vasara 450g" },
+    { "name":"Lux pajavasara 1000g Classic", "shortname":"" },
+    { "name":"Pintos lankanaula 25x1,5mm sähkösinkitty 0,5kg", "shortname":"Pintos lankanaula 25x1,5mm sähkösinki..." }
     
   ],
   "selectors":{

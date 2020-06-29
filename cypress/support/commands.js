@@ -7,11 +7,12 @@ import * as sc from './shoppingcart'
 var SHOPPINGCART_CACHE
 
 Cypress.Commands.add('initTest', (selector, locator) => {
-        SHOPPINGCART_CACHE = new sc.ShoppingcartCache()
-        SHOPPINGCART_CACHE.reset()
+    // cy.initData()
+    SHOPPINGCART_CACHE = new sc.ShoppingcartCache()
+    SHOPPINGCART_CACHE.reset()
 })
 
-Cypress.Commands.add('initTests', (selector, locator) => {
+Cypress.Commands.add('initData', (selector, locator) => {
 
 })
 //NAVIGATION COMMANDS
@@ -115,7 +116,7 @@ Cypress.Commands.add('verifyShoppingdesk', () => {
         cy.wrap(arr).each((index) => {
             cy.get('@products').eq(index).within(($element) => { 
                 cy.contains(SHOPPINGCART_CACHE.getProduct(index).name)
-                cy.contains(SHOPPINGCART_CACHE.getProduct(index).count + " " + SHOPPINGCART_CACHE.getProduct(index).unit)
+                cy.contains(SHOPPINGCART_CACHE.getProduct(index).count + " kpl") //+ SHOPPINGCART_CACHE.getProduct(index).unit)
                 cy.contains(SHOPPINGCART_CACHE.getProduct(index).price)       
             }) 
         })    
@@ -148,7 +149,7 @@ Cypress.Commands.add('verifyShoppingdesk', () => {
     cy.get('.totalPrice').then(wrapper =>
         {
         let wrapperTxt = wrapper.text()
-        cy.log('TotlaCost:' + wrapperTxt)
+        cy.log('TotalCost:' + wrapperTxt)
         SHOPPINGCART_CACHE.currentTotalCost = wrapperTxt.replace(/\s/g, '')
         }) 
 })
@@ -211,22 +212,43 @@ Cypress.Commands.add('verifyShoppingcartIsUpdated', () => {
 //ADD AND REMOVE PRODUCTS COMMANDS
 Cypress.Commands.add('addProducts', (product,count) => {
     cy.addProductToCache(product,count,false)
+    cy.buyProducts(product,count)
+    cy.verifyProductIsAdded()
+})
+
+Cypress.Commands.add('buyProductsFromProductpage', (product,count) => { 
+    cy.get('.d-sm-block > .shopperActions > .form-inline > div > #quantityProductPage').clear().type(count)
+    cy.get('.d-sm-block > .shopperActions > .form-inline > #add2CartBtn').click()
+})
+
+Cypress.Commands.add('buyProductFromResultpage', (product,count) => {
+    // Use just a part of the productname, cause thumnails may have short version of name
+    cy.log("try to buy " + product)
+    cy.get('.product_listing_container').contains(product).parents('[class="details"]')
+    .find('.online-availability > .btn').click() 
+})
+
+Cypress.Commands.add('goFromResultsToProductpageAndVerify', (product) => {
     cy.get('[title="' + product + '"]').filter('.img-responsive').click()
     cy.get('.productTitle').contains(product)
-    cy.get('.d-sm-block > .shopperActions > .form-inline > div > #quantityProductPage').clear().type(count)
-    cy.get('.d-sm-block > .shopperActions > .form-inline > #add2CartBtn').click() 
-    cy.verifyProductIsAdded()
 })
 
-Cypress.Commands.add('addProduct', (product) => {
-    cy.addProductToCache(product,1,true)
-    cy.verifyProductIsAdded()
+Cypress.Commands.add('addProductFromResultpage', (product, shortname) => {
+    // if(shortname != "") product = shortname
+    cy.addProductFromResultpageToCache(product, shortname,1)
+    cy.buyProductFromResultpage(shortname,1)
 })
 
-Cypress.Commands.add('addProductToCache', (product,count,buyIt) => {
+// was addProductFromProductpageToCache
+Cypress.Commands.add('addProductFromProductpageToCache', (product,count) => {
+
+    cy.log("addProductFromProductpageToCache")
     let price
     let unit
-    cy.get('.product_listing_container').contains(product).parents('[class="details"]').as('product_cache')
+
+    cy.get('#online-store-content')
+    .find('[class="current-price flex flex-wrap justify-content-between order-0 order-sm-3 pt-3 pb-2 px-0 px-sm-3"]')
+    .as('product_cache')
     
     cy.get('@product_cache').within(() => {
  
@@ -241,30 +263,58 @@ Cypress.Commands.add('addProductToCache', (product,count,buyIt) => {
             SHOPPINGCART_CACHE.addProductToList(product, price, count, unit)   
         }) 
     })
-
-    if(buyIt)
-    {
-        cy.get('.product_listing_container').contains(product).parents('[class="details"]')
-        .find('.online-availability > .btn').click() 
-    } 
 })
 
-Cypress.Commands.add('addProductsToShoppingcart', (product,count=1) => {
+// was addProductFromResultpageToCache
+Cypress.Commands.add('addProductFromResultpageToCache', (product,shortname,count) => {
+    let price
+    let unit
+
+    cy.get('.product_listing_container').contains(shortname).parents('[class="details"]').as('product_cache')
+    
+    cy.get('@product_cache').within(() => {
+ 
+        cy.get('.price').find('[class="special-price"]').invoke('attr', 'data-price').then(($data_price) =>
+        {
+            price = $data_price  
+        })
+
+        cy.get('.unit').then(($unit) =>
+        {
+            unit = $unit.text()  
+            SHOPPINGCART_CACHE.addProductToList(product, price, count, unit)   
+        }) 
+    })
+})
+
+Cypress.Commands.add('addProductsToShoppingcart', (product,shortname,count=1) => {
     cy.waitLoaderNotVisible()
-
-    if(count == 1)
-    {
-        cy.addProduct(product)
-    }
-    else
-    {
-        cy.addProducts(product,count)
-    }
+    cy.get('[id="page"]').then(($el) => {      
+        if ($el.hasClass('product-page product')) {
+            cy.log("Productpage")
+            cy.addProductFromProductpageToCache(product,count)
+            cy.buyProductsFromProductpage(product,count)
+        } else {
+            cy.log("Resultpage")
+            if(count == 1)
+            {
+                cy.addProductFromResultpage(product, shortname)
+            }
+            else
+            {
+                cy.goFromResultsToProductpageAndVerify()
+                cy.addProductFromProductpageToCache(product,count)
+                cy.buyProductsFromProductpage(product,count)
+            }                      
+        }
+      })
+//TODO testaa ensin onko monta vai yksi?!
+      cy.verifyProductIsAdded()
 })
 
-Cypress.Commands.add('searchAndAddProduct', (product,count=1) => {
+Cypress.Commands.add('searchAndAddProduct', (product, shortname,count=1) => {
     cy.get('[id="SimpleSearchForm_SearchTerm"]').clear().type(product + '{enter}') //
-    cy.addProductsToShoppingcart(product, count)
+    cy.addProductsToShoppingcart(product, shortname, count)
 })
 
 Cypress.Commands.add('removeProductsFromShoppingcart', () => {
@@ -294,6 +344,16 @@ Cypress.Commands.add('hideCookie', (selector) => {
       //     $btn.click()
       // })     
       // .click() //hide cookie bar 
+  })
+
+  Cypress.Commands.add('isExistElement', (selector) => {
+    cy.get('body').then(($el) => {
+      if ($el.has(selector)) {
+        return true
+      } else {
+        return false
+      }
+    })
   })
 
 

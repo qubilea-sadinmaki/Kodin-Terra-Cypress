@@ -36,7 +36,8 @@ describe('Kodin Terra tests', function() {
         cy.get('[id="SimpleSearchForm_SearchTerm"]').type('Weber')
         cy.get('[class="category_list"]').contains('PuutarhaGrillausWeber grillit').click()
         cy.get('#PageHeading_1_-2001_1989').contains('Weber grillit')
-        cy.addProductsToShoppingcart(this.DATA.products[5].name, 2)
+        cy.goFromResultsToProductpageAndVerify(this.DATA.products[5].name)
+        cy.addProductsToShoppingcart(this.DATA.products[5].name,this.DATA.products[5].shortname, 2)
         }) 
 
     it('Verify Shoppingcart Contents', function() {
@@ -46,25 +47,25 @@ describe('Kodin Terra tests', function() {
         cy.get('#widget_minishopcart').click()
         cy.get('#main').contains('Ostoskori on tyhjä.')
 
-        cy.searchAndAddProduct(this.DATA.products[0].name)
-        cy.searchAndAddProduct(this.DATA.products[1].name,2)
-        cy.searchAndAddProduct(this.DATA.products[2].name)
-        cy.searchAndAddProduct(this.DATA.products[3].name,5)
-        cy.searchAndAddProduct(this.DATA.products[4].name)
+        cy.searchAndAddProduct(this.DATA.products[0].name,this.DATA.products[0].shortname)     
+        cy.searchAndAddProduct(this.DATA.products[2].name,this.DATA.products[2].shortname)  
+        cy.searchAndAddProduct(this.DATA.products[3].name,this.DATA.products[3].shortname,5)
+        cy.searchAndAddProduct(this.DATA.products[1].name,this.DATA.products[1].shortname)
+        cy.searchAndAddProduct(this.DATA.products[4].name,this.DATA.products[4].shortname)
 
         cy.get('#widget_minishopcart').click()
         cy.verifyProductsCountOnShoppingcart()
         cy.removeProductsFromShoppingcart()
         }) 
 
-    it('Verify Product Categories', function() {
+    it.only('Verify Product Categories', function() {
         cy.gotoHomeAndVerify('fi/terra', 'Kodin Terra verkkokauppa - Etusivu')
         cy.navigateToLocationViaMenuAndVerify("Hameenlinna",'Kodin Terra Hämeenlinna')
         cy.navigateCategories('Työkalut ja -koneet', 'Vasarat ja lekat')
-        cy.addProductsToShoppingcart(this.DATA.products[7].name)
+        cy.addProductsToShoppingcart(this.DATA.products[7].name,this.DATA.products[7].shortname)
         cy.verifyShoppingcartIsUpdated()
         cy.navigateCategories('Rakentaminen', 'Naulat, naulauslevyt ja palkkikengät','Naulat')
-        cy.addProductsToShoppingcart(this.DATA.products[8].name)
+        cy.addProductsToShoppingcart(this.DATA.products[8].name,this.DATA.products[8].shortname)
         cy.gotoShoppingcart()
         cy.gotoShoppingdesk()   
         cy.verifyShoppingdesk()
@@ -84,8 +85,18 @@ describe('Kodin Terra tests', function() {
         })
       
         beforeEach(function() {
-            
-            cy.fixture('kodin_terra').as('DATA') 
+            // TODO init fixture
+            cy.fixture('kodin_terra').as('DATA').then(($fixture) => {
+                let i;
+                cy.log("this.DATA:" + this.DATA)
+                for (i = 0; i < this.DATA.products.length; i++) {
+                if(this.DATA.products[i].shortname == "")
+                {
+                    this.DATA.products[i].shortname = this.DATA.products[i].name;
+                }
+                }
+              })
+
             cy.hideCookie()
             cy.initTest()
         })
