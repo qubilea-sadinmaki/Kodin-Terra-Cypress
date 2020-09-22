@@ -31,8 +31,7 @@ class ShoppingcartCache
     {
         let retVal = this.saldo.toFixed(2)
         if(withSeparator != '') return retVal.replace(".", withSeparator)
-        else return retVal
-        
+        else return retVal      
     }
 
     get currentSaldo()
